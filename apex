@@ -154,7 +154,7 @@ local OnTopLinks = {
 }
 
 local VideoGuideLink = "https://vt.tiktok.com/ZSahDptUF/"
-local ScriptURL = "https://pastefy.app/W6PPU0J1/raw"
+local ScriptURL = "https://pastefy.app/DrUBYlg8/raw"
 
 local function getCurrentKeyIndex()
     if changeLog.currentIndex then

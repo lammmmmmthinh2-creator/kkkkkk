@@ -6,7 +6,7 @@ local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 
 -- 1. CẤU HÌNH NGÔN NGỮ (LANGUAGE CONFIG)
-local CurrentLang = "VN" -- Mặc định là Việt Nam
+local CurrentLang = "VN"
 
 local Locales = {
     VN = {
@@ -15,13 +15,15 @@ local Locales = {
         TabAI = "HỖ TRỢ AI",
         Placeholder = "Dán key vào đây...",
         Confirm = "XÁC NHẬN",
-        GetKey = "LẤY KEY",
-        Video = "VIDEO HƯỚNG DẪN",
-        ChangeLink = "ĐỔI LINK KHÁC",
-        Note = "LƯU Ý QUAN TRỌNG:\n• Nhấn LẤY KEY để copy link\n• Truy cập link để lấy key\n• Key thay đổi mỗi 24h (UTC Time)\n• Dán key vào ô trên sau khi copy\n• Mỗi ngày được đổi link tối đa 3 lần",
+        GetKey = "LẤY KEY (4M)",
+        GetKeyOnTop = "LẤY KEY (ONTOP)",
+        Video = "HƯỚNG DẪN",
+        ChangeLink = "ĐỔI LINK KHÁC (LINK4M)",
+        Note = "LƯU Ý QUAN TRỌNG:\n• Nhấn LẤY KEY để copy link\n• Truy cập link để lấy key\n• Key thay đổi mỗi 24h (UTC Time)\n• Dán key vào ô trên sau khi copy\n• Chỉ nút LINK4M mới đổi được link (tối đa 3 lần/ngày)\n• Nút ONTOP cố định theo ngày",
         Success = "THÀNH CÔNG! Key hợp lệ.",
         Fail = "Key không đúng! Vui lòng thử lại.",
-        CopyKey = "Đã copy link lấy key!",
+        CopyKey = "Đã copy link lấy key (Link4m)!",
+        CopyKeyOnTop = "Đã copy link lấy key (OnTop)!",
         CopyVideo = "Đã copy link video hướng dẫn!",
         ChangeLimit = "Đã hết lượt đổi link hôm nay! (Tối đa 3 lần/ngày)",
         ChangeCooldown = "Vui lòng đợi {time} giây nữa để đổi link tiếp!",
@@ -31,7 +33,7 @@ local Locales = {
         Questions = {
             {Q = "Cách lấy Key như thế nào?", A = "Bạn hãy nhấn nút VIDEO HƯỚNG DẪN ở tab Nhập Key và dán link lên trình duyệt để xem hướng dẫn chi tiết nhé."},
             {Q = "Gặp lỗi hoặc cần hỗ trợ trực tiếp?", A = "Hãy tham gia Discord hoặc nhắn tin Tiktok cho Admin nhé:\nDiscord: https://discord.gg/Ane8eqsAz\nTiktok: www.tiktok.com/@thekinmentit"},
-            {Q = "Tại sao Key bị sai?", A = "Hãy kiểm tra lại:\n1. Bạn đã copy hết Key chưa?\n2. Có khoảng trắng thừa không?\n3. Key đổi sau 24h, hãy lấy key mới nhất."}
+            {Q = "Tại sao Key bị sai?", A = "Hãy kiểm tra lại:\n1. Bạn đã copy hết Key chưa?\n2. Có khoảng trắng thừa không?\n3. Key đổi sau 24h, hãy lấy key mới nhất.\n4. Bạn đang dùng đúng nút LINK4M hay ONTOP chưa?"}
         }
     },
     EN = {
@@ -40,13 +42,15 @@ local Locales = {
         TabAI = "AI SUPPORT",
         Placeholder = "Paste key here...",
         Confirm = "CONFIRM",
-        GetKey = "GET KEY",
+        GetKey = "GET KEY (4M)",
+        GetKeyOnTop = "GET KEY (ONTOP)",
         Video = "TUTORIAL",
-        ChangeLink = "CHANGE LINK",
-        Note = "IMPORTANT NOTE:\n• Click GET KEY to copy the link\n• Visit the link to generate a key\n• Key changes every 24h (UTC Time)\n• Paste the key above after copying\n• Max 3 link changes per day",
+        ChangeLink = "CHANGE LINK (LINK4M)",
+        Note = "IMPORTANT NOTE:\n• Click GET KEY to copy the link\n• Visit the link to generate a key\n• Key changes every 24h (UTC Time)\n• Paste the key above after copying\n• Only LINK4M button can change link (max 3/day)\n• ONTOP button is fixed by day",
         Success = "SUCCESS! Valid Key.",
         Fail = "Invalid Key! Please try again.",
-        CopyKey = "Key link copied!",
+        CopyKey = "Link4m key link copied!",
+        CopyKeyOnTop = "OnTop key link copied!",
         CopyVideo = "Tutorial link copied!",
         ChangeLimit = "No more link changes today! (Max 3/day)",
         ChangeCooldown = "Please wait {time} seconds before changing again!",
@@ -56,7 +60,7 @@ local Locales = {
         Questions = {
             {Q = "How do I get the Key?", A = "Please click the TUTORIAL button in the Enter Key tab and paste the link into your browser to watch the guide."},
             {Q = "Support or Contact Admin?", A = "Please join our Discord or DM us on Tiktok for help:\nDiscord: https://discord.gg/Ane8eqsAz\nTiktok: www.tiktok.com/@thekinmentit"},
-            {Q = "Why is my Key invalid?", A = "Please check:\n1. Did you copy the full key?\n2. Is there any extra whitespace?\n3. Key expires every 24h, get a new one."}
+            {Q = "Why is my Key invalid?", A = "Please check:\n1. Did you copy the full key?\n2. Is there any extra whitespace?\n3. Key expires every 24h, get a new one.\n4. Are you using the correct LINK4M or ONTOP button?"}
         }
     }
 }
@@ -92,6 +96,7 @@ if changeLog.lastChange > 0 then
     end
 end
 
+-- ========== KEY LINK4M (đổi link được) ==========
 local Keys = {
     "Free_apexdkwiqkfkds@38", "Free_peqaldjfjAPEX?76", "Free_rc7pucfa2184@+apex",
     "Free_vnkkqodialfjđk@apex%", "Free_2024yekystemqpapex43", "Free_qlmonieakriapex484@&",
@@ -106,8 +111,13 @@ local Keys = {
     "Free_ưuqurhdhchhshwhqjwpapqkcbcja;&(28", "Free_apex6237899&291", "Free_qoeiejfjfjrjdapexjfjdjeueifuwhchjwiqekjebal38584@282;",
     "Free_apexpeacpapexpapexapex@292823838", "Free_alzmxnvaoepqur:&(₫!093", "Free_tyiwkdjgjaskjnzxcmpeax@,.g",
     "Free_bsndhruwoqpdjfnfkdjs", "Free_kaldicizoeiwofjfjrfhqkdk@₫;", "Free_eeeraakkjjfdwwiruf333",
-    "Free_ôrwuii!lllllaoekejfjwqpxjchfjs", "Free_mzjadksnxnzwp@@2711apex"
+    "Free_ôrwuii!lllllaoekejfjwqpxjchfjs", "Free_mzjadksnxnzwp@@2711apex",
+    "Free_apexapex838382@3", "Free_aksosoeiwjoqeoapex", "Free_anhbachkuaaapex@@",
+    "Free_apexgiroeidifiri3838", "Free_ankhufjskwifijapex@3848484{^*}^}^}^}^^}{*{*",
+    "Free_apexkskwkqoo2829@3'dhd", "Free_thỉalaanjba238383@&₫APEX", "Free_eiritiwoiwapeXmJl373;",
+    "Free_aoexkdkdkdkapex38", "Free_aPeXjdjsksje@2711"
 }
+
 local Links = {
     "https://vuotnhanh.com/al27", "https://vuotnhanh.com/iaBy", "https://vuotnhanh.com/Wa6e",
     "https://vuotnhanh.com/8rII", "https://vuotnhanh.com/06Gz", "https://vuotnhanh.com/dqrP",
@@ -122,8 +132,27 @@ local Links = {
     "https://vuotnhanh.com/RlGa", "https://vuotnhanh.com/OFtW", "https://vuotnhanh.com/GWnN",
     "https://vuotnhanh.com/eL6q", "https://vuotnhanh.com/G304", "https://vuotnhanh.com/WzEb",
     "https://vuotnhanh.com/TOG0", "https://vuotnhanh.com/57OX", "https://vuotnhanh.com/Otbc",
-    "https://vuotnhanh.com/nhEu"
+    "https://vuotnhanh.com/nhEu",
+    "https://vuotnhanh.com/NZ6r", "https://vuotnhanh.com/7RMQ", "https://vuotnhanh.com/9Cu4",
+    "https://vuotnhanh.com/PqT4", "https://vuotnhanh.com/pZaQ", "https://vuotnhanh.com/UO0D",
+    "https://vuotnhanh.com/kOJt", "https://vuotnhanh.com/rj0e", "https://vuotnhanh.com/gt6Z",
+    "https://vuotnhanh.com/hvUD"
 }
+
+-- ========== KEY ONTOP (cố định theo ngày, KHÔNG đổi link) ==========
+local OnTopKeys = {
+    "OnTop_apex838382@3", "OnTop_aksosoeiwjoqeoapex", "OnTop_anhbachkuaaapex@@",
+    "OnTop_apexgiroeidifiri3838", "OnTop_ankhufjskwifijapex@3848484",
+    "OnTop_apexkskwkqoo2829@3", "OnTop_thỉalaanjba238383@&₫", "OnTop_eiritiwoiwapeXmJl373;",
+    "OnTop_aoexkdkdkdkapex38", "OnTop_aPeXjdjsksje@2711"
+}
+local OnTopLinks = {
+    "https://vuotnhanh.com/NZ6r", "https://vuotnhanh.com/7RMQ", "https://vuotnhanh.com/9Cu4",
+    "https://vuotnhanh.com/PqT4", "https://vuotnhanh.com/pZaQ", "https://vuotnhanh.com/UO0D",
+    "https://vuotnhanh.com/kOJt", "https://vuotnhanh.com/rj0e", "https://vuotnhanh.com/gt6Z",
+    "https://vuotnhanh.com/hvUD"
+}
+
 local VideoGuideLink = "https://vt.tiktok.com/ZSahDptUF/"
 local ScriptURL = "https://pastefy.app/W6PPU0J1/raw"
 
@@ -132,12 +161,16 @@ local function getCurrentKeyIndex()
         return changeLog.currentIndex
     end
     local unix = DateTime.now().UnixTimestamp
-    return (math.floor(unix / 86400) % 40) + 1
+    return (math.floor(unix / 86400) % #Keys) + 1
 end
 
 local index = getCurrentKeyIndex()
 local CorrectKey = Keys[index]
 local KeyLink = Links[index]
+
+local OnTopIndex = (math.floor(DateTime.now().UnixTimestamp / 86400) % #OnTopKeys) + 1
+local CorrectKeyOnTop = OnTopKeys[OnTopIndex]
+local KeyLinkOnTop = OnTopLinks[OnTopIndex]
 
 if Data.used and Data.time and (DateTime.now().UnixTimestamp - Data.time) >= 86400 then
     Data = {}
@@ -211,10 +244,10 @@ end
 if not Data.used then
     TweenService:Create(blur, TweenInfo.new(0.6), {Size = 10}):Play()
 
-    -- MAIN FRAME - Nhỏ hơn, gọn hơn
+    -- MAIN FRAME
     local main = Instance.new("Frame")
-    main.Size = UDim2.new(0, 420, 0, 420)
-    main.Position = UDim2.new(0.5, -210, 0.5, -210)
+    main.Size = UDim2.new(0, 440, 0, 460)
+    main.Position = UDim2.new(0.5, -220, 0.5, -230)
     main.BackgroundColor3 = Color3.fromRGB(14, 14, 24)
     main.Active = true
     main.Draggable = true
@@ -299,10 +332,10 @@ if not Data.used then
     pageKey.Size = UDim2.new(1, 0, 1, 0)
     pageKey.BackgroundTransparency = 1
 
-    -- Input frame - xoá text mặc định, dùng placeholder
+    -- Ô nhập key
     local inputFrame = Instance.new("Frame", pageKey)
     inputFrame.Size = UDim2.new(0.86, 0, 0, 44)
-    inputFrame.Position = UDim2.new(0.07, 0, 0.06, 0)
+    inputFrame.Position = UDim2.new(0.07, 0, 0.04, 0)
     inputFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 38)
     Instance.new("UICorner", inputFrame).CornerRadius = UDim.new(0, 10)
     local inputStroke = Instance.new("UIStroke", inputFrame)
@@ -313,88 +346,137 @@ if not Data.used then
     keyBox.Size = UDim2.new(1, -20, 1, 0)
     keyBox.Position = UDim2.new(0, 10, 0, 0)
     keyBox.BackgroundTransparency = 1
-    keyBox.Text = "" -- Xoá text mặc định
+    keyBox.Text = ""
     keyBox.TextColor3 = Color3.fromRGB(220, 220, 255)
     keyBox.Font = Enum.Font.GothamMedium
     keyBox.TextSize = 13
     keyBox.PlaceholderColor3 = Color3.fromRGB(110, 110, 140)
-    keyBox.PlaceholderText = "" -- Sẽ update sau
+    keyBox.PlaceholderText = ""
     keyBox.TextXAlignment = Enum.TextXAlignment.Left
     keyBox.ClearTextOnFocus = false
 
-    -- Button Container - 3 nút chính
-    local btnContainer = Instance.new("Frame", pageKey)
-    btnContainer.Size = UDim2.new(0.86, 0, 0, 40)
-    btnContainer.Position = UDim2.new(0.07, 0, 0.24, 0)
-    btnContainer.BackgroundTransparency = 1
+    -- ============ HÀNG 1: Nút XÁC NHẬN (toàn bộ chiều rộng) ============
+    local confirmContainer = Instance.new("Frame", pageKey)
+    confirmContainer.Size = UDim2.new(0.86, 0, 0, 42)
+    confirmContainer.Position = UDim2.new(0.07, 0, 0.17, 0)
+    confirmContainer.BackgroundTransparency = 1
 
-    local function createStyledBtn(text, color1, color2, x, scaleX)
-        local btn = Instance.new("TextButton", btnContainer)
-        btn.Size = UDim2.new(scaleX or 0.3, 0, 1, 0)
-        btn.Position = UDim2.new(x, 0, 0, 0)
-        btn.Text = text
-        btn.TextColor3 = Color3.new(1,1,1)
-        btn.Font = Enum.Font.GothamBold
-        btn.TextSize = 12
-        btn.AutoButtonColor = false
-        btn.BackgroundColor3 = color1
-        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-        Instance.new("UIStroke", btn).Color = color2
-        createGradient(btn, ColorSequence.new({
-            ColorSequenceKeypoint.new(0, color1),
-            ColorSequenceKeypoint.new(1, color2)
-        }))
-        addButtonEffects(btn)
-        return btn
-    end
+    local confirmBtn = Instance.new("TextButton", confirmContainer)
+    confirmBtn.Size = UDim2.new(1, 0, 1, 0)
+    confirmBtn.Text = "XÁC NHẬN"
+    confirmBtn.TextColor3 = Color3.new(1,1,1)
+    confirmBtn.Font = Enum.Font.GothamBold
+    confirmBtn.TextSize = 14
+    confirmBtn.AutoButtonColor = false
+    confirmBtn.BackgroundColor3 = Color3.fromRGB(0,170,55)
+    Instance.new("UICorner", confirmBtn).CornerRadius = UDim.new(0, 10)
+    Instance.new("UIStroke", confirmBtn).Color = Color3.fromRGB(0,110,35)
+    createGradient(confirmBtn, ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0,200,80)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0,120,45))
+    }))
+    addButtonEffects(confirmBtn)
 
-    local confirmBtn = createStyledBtn("XÁC NHẬN", Color3.fromRGB(0,170,55), Color3.fromRGB(0,110,35), 0, 0.3)
-    local getKeyBtn = createStyledBtn("LẤY KEY", Color3.fromRGB(55,95,210), Color3.fromRGB(25,55,140), 0.33, 0.3)
-    local videoBtn = createStyledBtn("HƯỚNG DẪN", Color3.fromRGB(185,80,205), Color3.fromRGB(135,40,165), 0.66, 0.3)
+    -- ============ HÀNG 2: 2 nút LẤY KEY (4M | ONTOP) ============
+    local getKeyContainer = Instance.new("Frame", pageKey)
+    getKeyContainer.Size = UDim2.new(0.86, 0, 0, 42)
+    getKeyContainer.Position = UDim2.new(0.07, 0, 0.30, 0)
+    getKeyContainer.BackgroundTransparency = 1
 
-    -- NÚT ĐỔI LINK - Thiết kế nổi bật riêng biệt
-    local changeLinkContainer = Instance.new("Frame", pageKey)
-    changeLinkContainer.Size = UDim2.new(0.86, 0, 0, 36)
-    changeLinkContainer.Position = UDim2.new(0.07, 0, 0.40, 0)
-    changeLinkContainer.BackgroundTransparency = 1
-    
-    local changeLinkBtn = Instance.new("TextButton", changeLinkContainer)
-    changeLinkBtn.Size = UDim2.new(1, 0, 1, 0)
-    changeLinkBtn.Text = "" -- Sẽ update sau
+    local getKeyBtn = Instance.new("TextButton", getKeyContainer)
+    getKeyBtn.Size = UDim2.new(0.49, 0, 1, 0)
+    getKeyBtn.Position = UDim2.new(0, 0, 0, 0)
+    getKeyBtn.Text = "LẤY KEY (4M)"
+    getKeyBtn.TextColor3 = Color3.new(1,1,1)
+    getKeyBtn.Font = Enum.Font.GothamBold
+    getKeyBtn.TextSize = 13
+    getKeyBtn.AutoButtonColor = false
+    getKeyBtn.BackgroundColor3 = Color3.fromRGB(55,95,210)
+    Instance.new("UICorner", getKeyBtn).CornerRadius = UDim.new(0, 10)
+    Instance.new("UIStroke", getKeyBtn).Color = Color3.fromRGB(25,55,140)
+    createGradient(getKeyBtn, ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(75,120,240)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(35,70,180))
+    }))
+    addButtonEffects(getKeyBtn)
+
+    local getKeyOnTopBtn = Instance.new("TextButton", getKeyContainer)
+    getKeyOnTopBtn.Size = UDim2.new(0.49, 0, 1, 0)
+    getKeyOnTopBtn.Position = UDim2.new(0.51, 0, 0, 0)
+    getKeyOnTopBtn.Text = "LẤY KEY (ONTOP)"
+    getKeyOnTopBtn.TextColor3 = Color3.new(1,1,1)
+    getKeyOnTopBtn.Font = Enum.Font.GothamBold
+    getKeyOnTopBtn.TextSize = 13
+    getKeyOnTopBtn.AutoButtonColor = false
+    getKeyOnTopBtn.BackgroundColor3 = Color3.fromRGB(215,90,40)
+    Instance.new("UICorner", getKeyOnTopBtn).CornerRadius = UDim.new(0, 10)
+    Instance.new("UIStroke", getKeyOnTopBtn).Color = Color3.fromRGB(150,55,20)
+    createGradient(getKeyOnTopBtn, ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(240,120,60)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(180,70,25))
+    }))
+    addButtonEffects(getKeyOnTopBtn)
+
+    -- ============ HÀNG 3: 2 nút ĐỔI LINK + HƯỚNG DẪN ============
+    local miscContainer = Instance.new("Frame", pageKey)
+    miscContainer.Size = UDim2.new(0.86, 0, 0, 42)
+    miscContainer.Position = UDim2.new(0.07, 0, 0.43, 0)
+    miscContainer.BackgroundTransparency = 1
+
+    -- Nút đổi link (chỉ áp dụng cho LINK4M)
+    local changeLinkBtn = Instance.new("TextButton", miscContainer)
+    changeLinkBtn.Size = UDim2.new(0.49, 0, 1, 0)
+    changeLinkBtn.Position = UDim2.new(0, 0, 0, 0)
+    changeLinkBtn.Text = "ĐỔI LINK KHÁC (4M)"
     changeLinkBtn.TextColor3 = Color3.new(1,1,1)
     changeLinkBtn.Font = Enum.Font.GothamBold
-    changeLinkBtn.TextSize = 13
+    changeLinkBtn.TextSize = 12
     changeLinkBtn.AutoButtonColor = false
     changeLinkBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-    Instance.new("UICorner", changeLinkBtn).CornerRadius = UDim.new(0, 8)
-    
+    Instance.new("UICorner", changeLinkBtn).CornerRadius = UDim.new(0, 10)
     local changeStroke = Instance.new("UIStroke", changeLinkBtn)
     changeStroke.Thickness = 1.5
     changeStroke.Color = Color3.fromRGB(240, 170, 40)
-    
     createGradient(changeLinkBtn, ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(55, 35, 75)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(35, 25, 55)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(55, 35, 75))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(55, 40, 80)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(40, 28, 60)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(55, 40, 80))
     }))
-    
-    -- Label hiển thị số lượt còn lại
-    local changeCountLabel = Instance.new("TextLabel", changeLinkBtn)
-    changeCountLabel.Size = UDim2.new(0, 110, 0, 18)
-    changeCountLabel.Position = UDim2.new(1, -118, 0.5, -9)
+    addButtonEffects(changeLinkBtn)
+
+    -- Nút hướng dẫn
+    local videoBtn = Instance.new("TextButton", miscContainer)
+    videoBtn.Size = UDim2.new(0.49, 0, 1, 0)
+    videoBtn.Position = UDim2.new(0.51, 0, 0, 0)
+    videoBtn.Text = "HƯỚNG DẪN"
+    videoBtn.TextColor3 = Color3.new(1,1,1)
+    videoBtn.Font = Enum.Font.GothamBold
+    videoBtn.TextSize = 13
+    videoBtn.AutoButtonColor = false
+    videoBtn.BackgroundColor3 = Color3.fromRGB(185,80,205)
+    Instance.new("UICorner", videoBtn).CornerRadius = UDim.new(0, 10)
+    Instance.new("UIStroke", videoBtn).Color = Color3.fromRGB(135,40,165)
+    createGradient(videoBtn, ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(200,100,220)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(150,55,175))
+    }))
+    addButtonEffects(videoBtn)
+
+    -- Label đếm lượt đổi link (đặt dưới nút đổi link)
+    local changeCountLabel = Instance.new("TextLabel", pageKey)
+    changeCountLabel.Size = UDim2.new(0.86, 0, 0, 16)
+    changeCountLabel.Position = UDim2.new(0.07, 0, 0.55, 0)
     changeCountLabel.BackgroundTransparency = 1
-    changeCountLabel.Text = "(Còn lại: 3 lượt)"
+    changeCountLabel.Text = "(Còn lại: 3 lượt đổi link)"
     changeCountLabel.TextColor3 = Color3.fromRGB(240, 190, 90)
     changeCountLabel.Font = Enum.Font.GothamMedium
     changeCountLabel.TextSize = 10
-    changeCountLabel.TextXAlignment = Enum.TextXAlignment.Right
-    
-    addButtonEffects(changeLinkBtn)
+    changeCountLabel.TextXAlignment = Enum.TextXAlignment.Center
 
     -- Note box
     local noteBox = Instance.new("Frame", pageKey)
-    noteBox.Size = UDim2.new(0.86, 0, 0, 130)
-    noteBox.Position = UDim2.new(0.07, 0, 0.55, 0)
+    noteBox.Size = UDim2.new(0.86, 0, 0, 160)
+    noteBox.Position = UDim2.new(0.07, 0, 0.62, 0)
     noteBox.BackgroundColor3 = Color3.fromRGB(18, 18, 32)
     Instance.new("UICorner", noteBox).CornerRadius = UDim.new(0, 10)
     Instance.new("UIStroke", noteBox).Color = Color3.fromRGB(65, 50, 130)
@@ -416,7 +498,7 @@ if not Data.used then
     pageAI.Visible = false
 
     local chatScroll = Instance.new("ScrollingFrame", pageAI)
-    chatScroll.Size = UDim2.new(0.86, 0, 0, 235)
+    chatScroll.Size = UDim2.new(0.86, 0, 0, 285)
     chatScroll.Position = UDim2.new(0.07, 0, 0.02, 0)
     chatScroll.BackgroundTransparency = 1
     chatScroll.ScrollBarThickness = 2
@@ -444,9 +526,10 @@ if not Data.used then
         keyBox.PlaceholderText = L.Placeholder
         confirmBtn.Text = L.Confirm
         getKeyBtn.Text = L.GetKey
+        getKeyOnTopBtn.Text = L.GetKeyOnTop
         videoBtn.Text = L.Video
-        changeLinkBtn.Text = L.ChangeLink
-        changeCountLabel.Text = "(Còn lại: " .. (3 - changeLog.count) .. " lượt)"
+        changeLinkBtn.Text = CurrentLang == "VN" and "ĐỔI LINK KHÁC (4M)" or "CHANGE LINK (4M)"
+        changeCountLabel.Text = CurrentLang == "VN" and ("(Còn lại: " .. (3 - changeLog.count) .. " lượt đổi link)") or ("(Remaining: " .. (3 - changeLog.count) .. " changes)")
         noteLbl.Text = L.Note
         langBtn.Text = CurrentLang == "VN" and "VN" or "EN"
 
@@ -540,7 +623,8 @@ if not Data.used then
     end)
 
     confirmBtn.MouseButton1Click:Connect(function()
-        if normalizeKey(keyBox.Text) == normalizeKey(CorrectKey) then
+        local inputKey = normalizeKey(keyBox.Text)
+        if inputKey == normalizeKey(CorrectKey) or inputKey == normalizeKey(CorrectKeyOnTop) then
             saveData({used=true, time=DateTime.now().UnixTimestamp})
             game:GetService("StarterGui"):SetCore("SendNotification", {
                 Title = "APEX HUB", 
@@ -559,6 +643,7 @@ if not Data.used then
         end
     end)
 
+    -- Nút LẤY KEY (LINK4M)
     getKeyBtn.MouseButton1Click:Connect(function()
         if setclipboard then setclipboard(KeyLink) end
         game:GetService("StarterGui"):SetCore("SendNotification", {
@@ -567,7 +652,18 @@ if not Data.used then
             Duration = 3
         })
     end)
+
+    -- Nút LẤY KEY (ONTOP) - cố định, không đổi
+    getKeyOnTopBtn.MouseButton1Click:Connect(function()
+        if setclipboard then setclipboard(KeyLinkOnTop) end
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "APEX HUB", 
+            Text = Locales[CurrentLang].CopyKeyOnTop, 
+            Duration = 3
+        })
+    end)
     
+    -- Nút HƯỚNG DẪN
     videoBtn.MouseButton1Click:Connect(function()
         if setclipboard then setclipboard(VideoGuideLink) end
         game:GetService("StarterGui"):SetCore("SendNotification", {
@@ -577,6 +673,7 @@ if not Data.used then
         })
     end)
 
+    -- Nút ĐỔI LINK (chỉ đổi LINK4M)
     changeLinkBtn.MouseButton1Click:Connect(function()
         local L = Locales[CurrentLang]
         local now = DateTime.now().UnixTimestamp
@@ -614,7 +711,7 @@ if not Data.used then
         
         local newIndex
         repeat
-            newIndex = math.random(1, 40)
+            newIndex = math.random(1, #Keys)
         until newIndex ~= index
         
         changeLog.currentIndex = newIndex
@@ -624,7 +721,7 @@ if not Data.used then
         CorrectKey = Keys[index]
         KeyLink = Links[index]
         
-        changeCountLabel.Text = "(Còn lại: " .. (3 - changeLog.count) .. " lượt)"
+        changeCountLabel.Text = CurrentLang == "VN" and ("(Còn lại: " .. (3 - changeLog.count) .. " lượt đổi link)") or ("(Remaining: " .. (3 - changeLog.count) .. " changes)")
         
         game:GetService("StarterGui"):SetCore("SendNotification", {
             Title = "APEX HUB", 
